@@ -32,6 +32,7 @@ module.exports = (req, res) => {
   const currentDate = new Date().getTime();
   const ip          = requestIp.getClientIp(req); 
   const geo         = geoip.lookup(ip);
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   if (geo) {
     const location    = parseLocation(geo.ll);
