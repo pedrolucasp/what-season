@@ -16,7 +16,8 @@
   "dependencies": {
     "date-fns": "^1.29.0",
     "geoip-lite": "^1.2.2",
-    "micro": "^9.3.2"
+    "micro": "^9.3.2",
+    "request-ip": "^2.0.2"
   },
   "devDependencies": {
     "micro-dev": "^3.0.0"

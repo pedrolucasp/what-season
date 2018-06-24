@@ -1,6 +1,10 @@
+// What Season
+// Microservice API
 const isWithinRange          = require('date-fns/is_within_range')
 const parse                  = require('date-fns/parse');
 const geoip                  = require('geoip-lite');
+const requestIp              = require('request-ip');
+
 const southHemisphereSeasons = require('./seasons/south');
 const northHemisphereSeasons = require('./seasons/north');
 
@@ -24,21 +28,25 @@ const findCurrentSeason = (date, seasons) => {
   return { name: seasonName, start: parse(season[0]), end: parse(season[1]) };
 }
 
-
 module.exports = (req, res) => {
   const currentDate = new Date().getTime();
-  const ip          = req.connection.address().address;
-  const geo         = geoip.lookup("207.97.227.239");
-  const location    = parseLocation(geo.ll);
+  const ip          = requestIp.getClientIp(req); 
+  const geo         = geoip.lookup(ip);
 
-  const hemisphere    = isOnSouthHemisphere(location.latitude) ? "south" : "north";
-  let   currentSeason = {};
+  if (geo) {
+    const location    = parseLocation(geo.ll);
 
-  if (hemisphere == "south") {
-    currentSeason = findCurrentSeason(currentDate, southHemisphereSeasons);
+    const hemisphere    = isOnSouthHemisphere(location.latitude) ? "south" : "north";
+    let   currentSeason = {};
+
+    if (hemisphere == "south") {
+      currentSeason = findCurrentSeason(currentDate, southHemisphereSeasons);
+    } else {
+      currentSeason = findCurrentSeason(currentDate, northHemisphereSeasons);
+    }
+
+    return { currentDate, location, hemisphere, currentSeason }
   } else {
-    currentSeason = findCurrentSeason(currentDate, northHemisphereSeasons);
+    return { error: "Could not fetch user geo localization" }
   }
-
-  return { currentDate, location, hemisphere, currentSeason }
 }
